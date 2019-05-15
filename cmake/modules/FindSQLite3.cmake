@@ -35,8 +35,20 @@ find_path(SQLite3_INCLUDE_DIR NAMES sqlite3.h)
 mark_as_advanced(SQLite3_INCLUDE_DIR)
 
 # Look for the necessary library
-find_library(SQLite3_LIBRARY NAMES sqlite3 sqlite)
-mark_as_advanced(SQLite3_LIBRARY)
+set(SQLite3_NAMES ${SQLite3_NAMES} sqlite3 sqlite)
+foreach(name ${SQLite3_NAMES})
+  list(APPEND SQLite3_NAMES_DEBUG "${name}d")
+endforeach()
+
+if(NOT SQLite3_LIBRARY)
+  find_library(SQLite3_LIBRARY_RELEASE NAMES ${SQLite3_NAMES})
+  find_library(SQLite3_LIBRARY_DEBUG NAMES ${SQLite3_NAMES_DEBUG})
+  include(SelectLibraryConfigurations)
+  select_library_configurations(SQLite3)
+  mark_as_advanced(SQLite3_LIBRARY_RELEASE SQLite3_LIBRARY_DEBUG)
+endif()
+unset(SQLite3_NAMES)
+unset(SQLite3_NAMES_DEBUG)
 
 # Extract version information from the header file
 if(SQLite3_INCLUDE_DIR)
@@ -61,6 +73,21 @@ if(SQLite3_FOUND)
         add_library(SQLite::SQLite3 UNKNOWN IMPORTED)
         set_target_properties(SQLite::SQLite3 PROPERTIES
             IMPORTED_LOCATION             "${SQLite3_LIBRARY}"
+            IMPORTED_LINK_INTERFACE_LANGUAGES "C"
             INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIR}")
+        if(EXISTS "${SQLite3_LIBRARY_RELEASE}")
+            set_property(TARGET SQLite::SQLite3 APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS RELEASE)
+            set_target_properties(SQLite::SQLite3 PROPERTIES
+              IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+              IMPORTED_LOCATION_RELEASE "${SQLite3_LIBRARY_RELEASE}")
+        endif()
+        if(EXISTS "${SQLite3_LIBRARY_DEBUG}")
+            set_property(TARGET SQLite::SQLite3 APPEND PROPERTY
+              IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(SQLite::SQLite3 PROPERTIES
+              IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+              IMPORTED_LOCATION_DEBUG "${SQLite3_LIBRARY_DEBUG}")
+        endif()
     endif()
 endif()
