@@ -31,14 +31,13 @@ macro(soci_backend_deps_found NAME DEPS SUCCESS)
     if(NOT DEPEND_FOUND)
       list(APPEND DEPS_NOT_FOUND ${dep})
     else()
-      string(TOUPPER "${dep}" DEPU)
-      if( ${DEPU}_INCLUDE_DIR )
-        list(APPEND DEPS_INCLUDE_DIRS ${${DEPU}_INCLUDE_DIR})
+      if( ${dep}_INCLUDE_DIR )
+        list(APPEND DEPS_INCLUDE_DIRS ${${dep}_INCLUDE_DIR})
       endif()
-      if( ${DEPU}_INCLUDE_DIRS )
-        list(APPEND DEPS_INCLUDE_DIRS ${${DEPU}_INCLUDE_DIRS})
+      if( ${dep}_INCLUDE_DIRS )
+        list(APPEND DEPS_INCLUDE_DIRS ${${dep}_INCLUDE_DIRS})
       endif()
-      list(APPEND DEPS_LIBRARIES ${${DEPU}_LIBRARIES})
+      list(APPEND DEPS_LIBRARIES ${${dep}_LIBRARIES})
     endif()
   endforeach()
 
@@ -110,6 +109,7 @@ macro(soci_backend NAME)
 
       # Backend-specific depedencies
       set(THIS_BACKEND_DEPENDS_INCLUDE_DIRS ${${NAMEU}_DEPS_INCLUDE_DIRS})
+
       set(THIS_BACKEND_DEPENDS_LIBRARIES ${${NAMEU}_DEPS_LIBRARIES})
       set(THIS_BACKEND_DEPENDS_DEFS ${${NAMEU}_DEPS_DEFS})
 
